@@ -5,86 +5,106 @@
 <title>💌 A Little Game</title>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(#ffe0e9, #ff9fb3);
-    text-align: center;
-    padding: 40px;
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(#ffe0e9, #ff9fb3);
+  text-align: center;
+  padding: 40px;
+  overflow-x: hidden;
+}
+
+h1 { color: #b30047; }
+
+.hidden { display: none; }
+
+input {
+  padding: 10px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  width: 250px;
+  text-align: center;
+}
+
+button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  background: #ff4d79;
+  color: white;
+}
+
+button:hover { background: #e6005c; }
+
+.hint { margin-top: 15px; font-size: 22px; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  max-width: 500px;
+  margin: 30px auto;
+}
+
+.tile {
+  background: #ff4d79;
+  height: 120px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.cover {
+  position: absolute;
+  font-size: 40px;
+}
+
+.defaultLetter {
+  width: 100%;
+  height: 100%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  font-size: 40px;
+  font-weight: bold;
+  color: white;
+}
+
+.tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 15px;
+  display: none;
+}
+
+/* Confetti */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  animation: fall linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(100vh) rotate(720deg);
   }
-
-  h1 { color: #b30047; }
-
-  .hidden { display: none; }
-
-  input {
-    padding: 10px;
-    font-size: 18px;
-    border-radius: 8px;
-    border: none;
-    width: 250px;
-    text-align: center;
-  }
-
-  button {
-    margin-top: 15px;
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-    background: #ff4d79;
-    color: white;
-  }
-
-  button:hover {
-    background: #e6005c;
-  }
-
-  .hint {
-    margin-top: 15px;
-    font-size: 22px;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    max-width: 500px;
-    margin: 30px auto;
-  }
-
-  .tile {
-    background: #ff4d79;
-    height: 120px;
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
-    color: white;
-    cursor: pointer;
-  }
-
-  .tile img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 15px;
-    display: none;
-  }
-
-  .revealed img { display: block; }
-  .revealed span { display: none; }
-
-  .question {
-    font-size: 60px;
-  }
+}
 </style>
 </head>
 
 <body>
 
-<!-- PASSWORD SCREEN -->
 <div id="passwordScreen">
   <h1>🔒 Enter the password</h1>
   <p>💡 Two words · 11 letters total</p>
@@ -96,79 +116,135 @@
   <br><br>
   <button onclick="showHint()">Hints</button>
 
-  <div id="hint1" class="hint hidden">🍎🤴</div>
+  <div id="hint1" class="hint hidden">🍬🤴</div>
   <button id="stillStuck" class="hidden" onclick="autoFill()">Still stuck?</button>
 </div>
 
-<!-- GAME GRID -->
 <div id="gameScreen" class="hidden">
   <h1>💖 Tap the tiles 💖</h1>
   <div class="grid" id="grid"></div>
 </div>
 
 <script>
-  const correctPassword = "sweet prince";
+const correctPassword = "sweet prince";
 
-  function checkPassword() {
-    const input = document.getElementById("passwordInput").value.toLowerCase().trim();
-    if (input === correctPassword) {
-      document.getElementById("passwordScreen").style.display = "none";
-      document.getElementById("gameScreen").style.display = "block";
-    } else {
-      alert("Not quite 💭");
+function checkPassword() {
+  const input = document.getElementById("passwordInput").value.toLowerCase().trim();
+  if (input === correctPassword) {
+    document.getElementById("passwordScreen").style.display = "none";
+    document.getElementById("gameScreen").style.display = "block";
+  } else {
+    alert("Not quite 💭");
+  }
+}
+
+function showHint() {
+  document.getElementById("hint1").classList.remove("hidden");
+  document.getElementById("stillStuck").classList.remove("hidden");
+}
+
+function autoFill() {
+  document.getElementById("passwordInput").value = "sweet ";
+}
+
+const phrase = [
+  "B","E","M","Y",
+  "V","A","L","E",
+  "N","T","I","N",
+  "E","?"
+];
+
+/* 🔥 ADD YOUR SIX LETTER IMAGES HERE */
+const customImages = {
+  "A": "images/A.jpeg",
+  "L": "images/L.jpeg",
+  "M": "images/M.jpeg",
+  "T": "images/T.jpeg",
+  "V": "images/V.jpeg",
+  "Y": "images/Y.jpeg"
+};
+
+let revealedCount = 0;
+const grid = document.getElementById("grid");
+
+phrase.forEach(letter => {
+
+  const tile = document.createElement("div");
+  tile.className = "tile";
+
+  const cover = document.createElement("span");
+  cover.className = "cover";
+  cover.textContent = "❤️";
+  tile.appendChild(cover);
+
+  let content;
+
+  if (customImages[letter]) {
+    content = document.createElement("img");
+    content.src = customImages[letter];
+  } else {
+    content = document.createElement("div");
+    content.className = "defaultLetter";
+
+    const gradients = [
+      "linear-gradient(135deg,#ff4d79,#ff99ac)",
+      "linear-gradient(135deg,#ff5f6d,#ffc371)",
+      "linear-gradient(135deg,#ff758c,#ff7eb3)",
+      "linear-gradient(135deg,#f953c6,#b91d73)"
+    ];
+
+    content.style.background =
+      gradients[Math.floor(Math.random() * gradients.length)];
+
+    content.innerHTML = `<span>${letter}</span>`;
+  }
+
+  tile.appendChild(content);
+
+  tile.onclick = () => {
+    if (!tile.classList.contains("revealed")) {
+      tile.classList.add("revealed");
+
+      cover.style.display = "none";
+
+      if (content.tagName === "IMG") {
+        content.style.display = "block";
+      } else {
+        content.style.display = "flex";
+      }
+
+      revealedCount++;
+
+      if (revealedCount === phrase.length) {
+        launchConfetti();
+      }
     }
+  };
+
+  grid.appendChild(tile);
+});
+
+function launchConfetti() {
+  for (let i = 0; i < 150; i++) {
+    const confetti = document.createElement("div");
+    confetti.classList.add("confetti");
+
+    const colors = ["#ff4d79","#ff99ac","#ffc371","#f953c6","#ffffff"];
+    confetti.style.background =
+      colors[Math.floor(Math.random() * colors.length)];
+
+    confetti.style.left = Math.random() * 100 + "vw";
+    confetti.style.animationDuration = (Math.random() * 3 + 2) + "s";
+
+    document.body.appendChild(confetti);
+
+    setTimeout(() => confetti.remove(), 5000);
   }
-
-  function showHint() {
-    document.getElementById("hint1").classList.remove("hidden");
-    document.getElementById("stillStuck").classList.remove("hidden");
-  }
-
-  function autoFill() {
-    document.getElementById("passwordInput").value = "sweet ";
-  }
-
-  const tiles = [
-    { img: "B.jpg" },
-    { img: "E.jpg" },
-    { img: "M.jpg" },
-    { img: "Y.jpg" },
-    { img: "V.jpg" },
-    { img: "A.jpg" },
-    { img: "L.jpg" },
-    { img: "E2.jpg" },
-    { img: "N.jpg" },
-    { img: "T.jpg" },
-    { img: "I.jpg" },
-    { img: "N2.jpg" },
-    { img: "E3.jpg" },
-    { question: true }
-  ];
-
-  const grid = document.getElementById("grid");
-
-  tiles.forEach(tileData => {
-    const tile = document.createElement("div");
-    tile.className = "tile";
-
-    if (tileData.question) {
-      tile.innerHTML = "<span class='question'>?</span>";
-    } else {
-      const span = document.createElement("span");
-      span.textContent = "❤️";
-
-      const img = document.createElement("img");
-      img.src = `images/${tileData.img}`;
-
-      tile.appendChild(span);
-      tile.appendChild(img);
-    }
-
-    tile.onclick = () => tile.classList.add("revealed");
-    grid.appendChild(tile);
-  });
+}
 </script>
 
 </body>
 </html>
+
+
 
